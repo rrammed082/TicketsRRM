@@ -20,7 +20,7 @@ public class GoldenRaceAdapter extends ArrayAdapter<Ticket> {
 
     public View getView(int position, View convertView, ViewGroup parent){
 
-        // Obtiene la instancia de motocicleta en la posición dada.
+        // Obtiene la instancia de ticket en la posición dada.
         Ticket ticket = getItem(position);
 
         // Verifica si la vista ya ha sido creada, de lo contrario, infla el diseño personalizado.
@@ -29,16 +29,15 @@ public class GoldenRaceAdapter extends ArrayAdapter<Ticket> {
         }
 
         // Obtiene las referencias a los TextViews en el diseño personalizado.
-        TextView tvVersion = convertView.findViewById(R.id.tvVersion);
         TextView tvCreationDate = convertView.findViewById(R.id.tvCreationDate);
         TextView tvTotalAmount = convertView.findViewById(R.id.tvTotalAmount);
         TextView tvId = convertView.findViewById(R.id.tvId);
 
-        // Asigna los valores de la motocicleta a los TextViews.
-        tvVersion.setText(ticket.getVersion().toString());
-        tvCreationDate.setText(ticket.getCreationDate());
-        tvTotalAmount.setText(ticket.getTotalAmount().toString());
-        tvId.setText(ticket.getId().toString());
+        // Asigna los valores del ticket a los TextViews.
+        tvId.setText("ID: " + ticket.getId().toString());
+        tvCreationDate.setText("Creation Date: " + ticket.getCreationDate());
+        tvTotalAmount.setText("Total Amount: " + String.valueOf(ticket.getTotalAmount()));
+
 
         // Devuelve la vista actualizada.
         return convertView;

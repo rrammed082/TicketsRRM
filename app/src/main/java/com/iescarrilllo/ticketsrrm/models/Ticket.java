@@ -21,9 +21,6 @@ public class Ticket implements Serializable {
     @SerializedName("id")
     @Expose
     private Integer id;
-    @SerializedName("version")
-    @Expose
-    private Integer version;
 
     public Ticket() {
     }
@@ -60,14 +57,6 @@ public class Ticket implements Serializable {
         this.id = id;
     }
 
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
-
     @Override
     public String toString() {
         return "Ticket{" +
@@ -75,7 +64,6 @@ public class Ticket implements Serializable {
                 ", totalAmount=" + totalAmount +
                 ", detailTickets=" + detailTickets +
                 ", id=" + id +
-                ", version=" + version +
                 '}';
     }
 }
