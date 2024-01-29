@@ -29,28 +29,33 @@ public class CreateTicketActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_ticket);
 
+        // Obtenemos referencias a las vistas en el diseño
         Button btnSubmit = findViewById(R.id.btnSubmit);
         ImageView ivBack = findViewById(R.id.ivBack);
         EditText etTotalAmount = findViewById(R.id.etTotalAmount);
 
+        // Inicializamos el servicio de la API de GoldenRace
         GoldenRaceApiService apiService = GoldenRaceApiClient.getClient().create(GoldenRaceApiService.class);
 
+        // Creamos un objeto Ticket
         Ticket ticket = new Ticket();
 
         // Obtenemos la fecha y hora actual
         LocalDateTime now = LocalDateTime.now();
 
-        // Define el patrón de formato
+        // Definimos el patrón de formato
         String patron = "dd/MM/yyyy HH:mm:ss";
 
-        // Crea un objeto DateTimeFormatter con el patrón
+        // Creamos un objeto DateTimeFormatter con el patrón
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(patron);
 
-        // Formatea la fecha y hora actual usando el patrón
+        // Formateamos la fecha y hora actual usando el patrón
         String fechaFormateada = now.format(formatter);
 
+        // Configuramos el listener del botón de envío (submit)
         btnSubmit.setOnClickListener(v -> {
 
+            // Validar entrada del usuario para el campo de TotalAmount
             if (etTotalAmount.getText().toString().isEmpty()) {
                 Toast.makeText(CreateTicketActivity.this, "Please enter the total amount", Toast.LENGTH_SHORT).show();
                 etTotalAmount.setError("Total amount is required");
@@ -61,15 +66,17 @@ public class CreateTicketActivity extends AppCompatActivity {
                 ticket.setCreationDate(fechaFormateada);
                 ticket.setTotalAmount(Double.parseDouble(etTotalAmount.getText().toString()));
 
+                // Realizamos la llamada a la API para crear un nuevo Ticket
                 Call<Ticket> call = apiService.postTicket(ticket);
                 call.enqueue(new Callback<Ticket>() {
                     @Override
                     public void onResponse(Call<Ticket> call, Response<Ticket> response) {
-                        if (response.isSuccessful()) {
+                        if (response.isSuccessful()) { // Si la respuesta es exitosa
                             Ticket createdTicket = response.body();
                             Toast.makeText(CreateTicketActivity.this, "Successfull ticket created", Toast.LENGTH_LONG).show();
+                            // Enivamos a la ActivityMain
                             Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
-                            onBackPressed();
+                            startActivity(mainActivityIntent);
                             finish();
                         } else {
                             Toast.makeText(CreateTicketActivity.this, "Error to upload Ticket", Toast.LENGTH_LONG).show();
@@ -79,12 +86,13 @@ public class CreateTicketActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(Call<Ticket> call, Throwable t) {
                         // Manejar el caso en que la llamada falle
-                        Log.e("Error", "Request rejected", t);
+                        Toast.makeText(CreateTicketActivity.this, "Request rejected", Toast.LENGTH_LONG).show();
                     }
                 });
             }
         });
 
+        // Configuramos el listener del botón de retroceso (back)
         ivBack.setOnClickListener(v -> {
             onBackPressed();
             finish();

@@ -101,10 +101,11 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="@color/white"
-            android:gravity="center"
-            android:orientation="horizontal">
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:paddingTop="20dp">
 
 
             <Button
@@ -113,7 +114,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:backgroundTint="#0071D4"
-                android:text="Add" />
+                android:text="Add Detail" />
 
 
             <Button
@@ -122,7 +123,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:backgroundTint="#B90000"
-                android:text="Delete" />
+                android:text="Delete Ticket" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/btnUpdate"
@@ -130,7 +139,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:backgroundTint="#197F02"
-                android:text="Update" />
+                android:text="Update Ticket" />
         </LinearLayout>
 
     </LinearLayout>
@@ -139,8 +148,8 @@
         android:id="@+id/ivResearch"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:layout_marginEnd="10dp"
         android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/research" />

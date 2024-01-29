@@ -63,12 +63,31 @@ public interface GoldenRaceApiService {
     @GET("api2/detailTickets/{id}")
     Call<List<DetailTicket>> getDetailsTicket(@Path("id") int ticketId);
 
+    /**
+     * Realiza una petición DELETE para eliminar un DetailTicket específico del servidor por su ID.
+     *
+     * @param detailTicketId El ID del DetailTicket que se desea borrar.
+     * @return Una llamada de Retrofit sin respuesta (Void).
+     */
     @DELETE("api2/detailTicket/{id}")
     Call<Void> deteleDetailTicket(@Path("id") int detailTicketId);
 
+    /**
+     * Realiza una petición POST para crear un nuevo DetailTicket en el servidor.
+     *
+     * @param detailsTicket El objeto DetailTicket que se desea crear.
+     * @return Una llamada de Retrofit que contiene el DetailTicket creado.
+     */
     @POST("api2/detailTicket/")
     Call<DetailTicket> postDetailTicket(@Body DetailTicket detailsTicket);
 
+    /**
+     * Realiza una petición PUT para actualizar un DetailTicket existente en el servidor.
+     *
+     * @param detailTicketId El ID del DetailTicket que se desea actualizar.
+     * @param detailTicket   El objeto DetailTicket con los nuevos datos.
+     * @return Una llamada de Retrofit que contiene el DetailTicket actualizado.
+     */
     @PUT("api2/detailTicket/{id}")
     Call<DetailTicket> updateDetailTicket(@Path("id") int detailTicketId, @Body DetailTicket detailTicket);
 }

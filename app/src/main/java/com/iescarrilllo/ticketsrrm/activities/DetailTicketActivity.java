@@ -28,15 +28,19 @@ import retrofit2.Response;
 
 public class DetailTicketActivity extends AppCompatActivity {
     Ticket ticket;
+    Boolean updateTotal;
     TextView tvTotalAmount;
     ListView lvDetailsTicketList;
     GoldenRaceAdapterApi2 goldenRaceAdapterApi2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_ticket);
 
+        // Obtenemos el objeto Ticket de la intención
         ticket = (Ticket) getIntent().getSerializableExtra("ticketSelected");
+        updateTotal = getIntent().getBooleanExtra("updateTotal", false);
 
         // Obtiene las referencias a los TextViews en el diseño personalizado.
         TextView tvCreationDate = findViewById(R.id.tvCreationDate);
@@ -49,22 +53,23 @@ public class DetailTicketActivity extends AppCompatActivity {
         ImageView ivBack = findViewById(R.id.ivBack);
         ImageView ivResearch = findViewById(R.id.ivResearch);
 
-
-
         // Instanciamos el Services
         GoldenRaceApiService apiService = GoldenRaceApiClient.getClient().create(GoldenRaceApiService.class);
 
-        // Asigna los valores de la motocicleta a los TextViews.
+        // Asignamos los valores de la motocicleta a los TextViews.
         tvId.setText("ID: " + ticket.getId().toString());
         tvCreationDate.setText("Creation Date: " + ticket.getCreationDate());
         tvTotalAmount.setText("Total Amount: " + String.valueOf(ticket.getTotalAmount()));
 
+        // Llamamos al método para cargar la listview
         research(apiService);
 
+        // Configuramos el listener del botón de investigación (research)
         ivResearch.setOnClickListener(v -> {
             research(apiService);
         });
 
+        // Configurar el listener de la lista de detalles del Ticket
         lvDetailsTicketList.setOnItemClickListener((parent, view, position, id) -> {
             // Obtenemos el Ticket seleccionado
             DetailTicket detailTicketSelect = (DetailTicket) parent.getItemAtPosition(position);
@@ -76,75 +81,100 @@ public class DetailTicketActivity extends AppCompatActivity {
             startActivity(detailsTicketsViewIntent);
         });
 
+        // Configuramos el listener del botón de añadir (add)
         btnAdd.setOnClickListener(v -> {
             Intent createDetailTicketIntent = new Intent(getApplicationContext(), CreateDetailTicketActivity.class);
             createDetailTicketIntent.putExtra("ticket", ticket);
             startActivity(createDetailTicketIntent);
+            finish();
         });
 
+        // Configuramos el listener del botón de eliminar (delete)
         btnDelete.setOnClickListener(v -> {
+            // Realizamos la llamada a la API para eliminar el Ticket
             Call<Void> callDelete = apiService.deleteTicket(ticket.getId());
 
             callDelete.enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
-                    if(response.isSuccessful()) {
-                        Log.i("Ticket Deleted", "The Ticked has been removed");
+                    if (response.isSuccessful()) { // Si la respuesta es exitosa
+                        Toast.makeText(DetailTicketActivity.this, "The Ticked has been removed", Toast.LENGTH_LONG).show();
                         Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
-                        onBackPressed();
+                        startActivity(mainActivityIntent);
                         finish();
+                    } else {
+                        Toast.makeText(DetailTicketActivity.this, "Error deteling Ticket", Toast.LENGTH_LONG).show();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
-                    Log.e("Error", "Request rejected");
+                    Toast.makeText(DetailTicketActivity.this, "Request rejected", Toast.LENGTH_LONG).show();
                 }
             });
         });
 
+        // Configuramos el listener del botón de actualizar (update)
         btnUpdate.setOnClickListener(v -> {
+
+            // Iniciamos una nueva actividad para actualizar el Ticket
             Intent updateTicketIntent = new Intent(getApplicationContext(), UpdateTicketActivity.class);
             updateTicketIntent.putExtra("ticket", ticket);
             startActivity(updateTicketIntent);
         });
 
+        // Configuramos el listener del botón de retroceso (back)
         ivBack.setOnClickListener(v -> {
-            onBackPressed();
-            finish();
+            Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(mainActivityIntent);
         });
     }
 
-    private void calculateTotalAmount(GoldenRaceApiService apiService, List<DetailTicket> detailTicketList){
+    /**
+     *  Método para calcular y actualizar el monto total del Ticket
+     *  @param apiService apiService que va a utilizar el método
+     *  @param detailTicketList lista de detalles de la clase que va a utilizarse para actualizar el TotalAmount
+     */
+    private void calculateTotalAmount(GoldenRaceApiService apiService, List<DetailTicket> detailTicketList) {
         Double totalValue = 0.0;
 
+        // Recorremos la lista para ir almacenando el Amount de cada elemento
         for (DetailTicket d : detailTicketList) {
             totalValue += d.getAmount();
         }
 
+        // Seteamos el valor del bucle en el objeto Ticket
         ticket.setTotalAmount(totalValue);
 
+        // Realizar la llamada a la API para actualizar el Ticket con el nuevo totalAmount
         Call<Ticket> callUpdateTicket = apiService.updateTicket(ticket.getId(), ticket);
 
         callUpdateTicket.enqueue(new Callback<Ticket>() {
             @Override
             public void onResponse(Call<Ticket> call, Response<Ticket> response) {
-                if(response.isSuccessful()){
+                if (response.isSuccessful()) { // Si la respuesta es exitosa
                     tvTotalAmount.setText("Total Amount: " + ticket.getTotalAmount());
-                }
-                else {
+                    Toast.makeText(DetailTicketActivity.this, "TotalAmount updated", Toast.LENGTH_SHORT).show();
+                } else { // Manejamos en el caso de error en la respuesta de la API
                     Toast.makeText(DetailTicketActivity.this, "Error updating ticket total amount", Toast.LENGTH_SHORT).show();
                 }
             }
 
+            // Manejamos el caso en que la llamada falle
             @Override
             public void onFailure(Call<Ticket> call, Throwable t) {
-                Log.e("Error", "Request rejected", t);
+                Toast.makeText(DetailTicketActivity.this, "Request rejected", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    /**
+     *  Método para obtener y mostrar los detalles del Ticket desde la API
+     *  @param apiService
+     */
     private void research(GoldenRaceApiService apiService) {
+
+        // Realizar la llamada a la API para obtener los DetailTickets del Ticket actual
         Call<List<DetailTicket>> call = apiService.getDetailsTicket(ticket.getId());
 
         call.enqueue(new Callback<List<DetailTicket>>() {
@@ -152,11 +182,15 @@ public class DetailTicketActivity extends AppCompatActivity {
             public void onResponse(Call<List<DetailTicket>> call, Response<List<DetailTicket>> response) {
                 List<DetailTicket> detailTicketsList = new ArrayList<>();
 
-                if(response.isSuccessful()) {
+                if (response.isSuccessful()) { // Si la respuesta es exitosa
                     detailTicketsList = response.body();
 
-                    calculateTotalAmount(apiService, detailTicketsList);
+                    if (updateTotal) { // Si la variable recibida por el Intent es true se vuelve a calcular el ToutalAmount
+                        // Llamamos al método calculateTotalAmount para verificar si hay algún cambio
+                        calculateTotalAmount(apiService, detailTicketsList);
+                    }
 
+                    // Configuramos el adaptador para la lista de DetailTickets
                     goldenRaceAdapterApi2 = new GoldenRaceAdapterApi2(getApplicationContext(), detailTicketsList);
                     lvDetailsTicketList.setAdapter(goldenRaceAdapterApi2);
                 }

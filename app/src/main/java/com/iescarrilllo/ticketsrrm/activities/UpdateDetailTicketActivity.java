@@ -14,6 +14,7 @@ import com.iescarrilllo.ticketsrrm.R;
 import com.iescarrilllo.ticketsrrm.apiClients.GoldenRaceApiClient;
 import com.iescarrilllo.ticketsrrm.apiServices.GoldenRaceApiService;
 import com.iescarrilllo.ticketsrrm.models.DetailTicket;
+import com.iescarrilllo.ticketsrrm.models.Ticket;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -26,19 +27,23 @@ public class UpdateDetailTicketActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_detail_ticket);
 
+        // Obtenemos el objeto DetailTicket de la intención
         DetailTicket detailTicket = (DetailTicket) getIntent().getSerializableExtra("detailTicket");
 
+        // Obtenemos referencias a las vistas en el diseño
         EditText etDescription = findViewById(R.id.etDescription);
         EditText etAmount = findViewById(R.id.etAmount);
         Button btnUpdate = findViewById(R.id.btnUpdate);
         ImageView ivBack = findViewById(R.id.ivBack);
 
+        // Inicializamos el servicio de la API de GoldenRace
         GoldenRaceApiService apiService = GoldenRaceApiClient.getClient().create(GoldenRaceApiService.class);
 
+        // Configuramos los valores iniciales de los EditText con los datos actuales del DetailTicket
         etDescription.setText(detailTicket.getDescription());
         etAmount.setText(String.valueOf(detailTicket.getAmount()));
 
-
+        // Configuramos el listener del botón de actualización (update)
         btnUpdate.setOnClickListener(v -> {
             if (etDescription.getText().toString().isEmpty()) {
                 Toast.makeText(UpdateDetailTicketActivity.this, "Please type description", Toast.LENGTH_SHORT).show();
@@ -53,18 +58,24 @@ public class UpdateDetailTicketActivity extends AppCompatActivity {
                 etDescription.setError("Description must have at least 5 characters");
                 etDescription.requestFocus();
             } else {
+
+                // Actualizar los valores del DetailTicket con los nuevos datos
                 detailTicket.setDescription(etDescription.getText().toString());
                 detailTicket.setAmount(Double.parseDouble(etAmount.getText().toString()));
 
+                // Realizamos la llamada a la API para actualizar el DetailTicket
                 Call<DetailTicket> updateDetailTicket = apiService.updateDetailTicket(detailTicket.getId(), detailTicket);
-                Log.i("ID DETAILS TICKET", detailTicket.toString());
 
                 updateDetailTicket.enqueue(new Callback<DetailTicket>() {
                     @Override
                     public void onResponse(Call<DetailTicket> call, Response<DetailTicket> response) {
-                        if (response.isSuccessful()) {
+                        if (response.isSuccessful()) { // Si la respuesta es exitosa
                             Toast.makeText(UpdateDetailTicketActivity.this, "Detail ticket updated", Toast.LENGTH_SHORT).show();
-                            onBackPressed();
+                            Ticket ticketAux = detailTicket.getTicket();
+                            Intent backDetailTicketIntent = new Intent(getApplicationContext(), DetailTicketActivity.class);
+                            backDetailTicketIntent.putExtra("ticketSelected", ticketAux);
+                            backDetailTicketIntent.putExtra("updateTotal", true);
+                            startActivity(backDetailTicketIntent);
                             finish();
                         } else {
                             Toast.makeText(UpdateDetailTicketActivity.this, "Error to update Detail Ticket", Toast.LENGTH_SHORT).show();
@@ -73,12 +84,13 @@ public class UpdateDetailTicketActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(Call<DetailTicket> call, Throwable t) {
-                        Log.e("Error", "Request rejected", t);
+                        Toast.makeText(UpdateDetailTicketActivity.this, "Request rejected", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
         });
 
+        // Configuramos el listener del botón de retroceso (back)
         ivBack.setOnClickListener(v -> {
             onBackPressed();
             finish();
